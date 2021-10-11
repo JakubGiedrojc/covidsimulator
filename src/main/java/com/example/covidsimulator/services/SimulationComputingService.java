@@ -1,19 +1,18 @@
 package com.example.covidsimulator.services;
 
+import com.example.covidsimulator.api.SimulationEntryDataDto;
+import com.example.covidsimulator.api.SimulationOutputDto;
 import com.example.covidsimulator.database.entities.SimulationEntryData;
 import com.example.covidsimulator.database.entities.SimulationOutput;
 import com.example.covidsimulator.database.repositories.SimulationEntrySetRepository;
 import com.example.covidsimulator.database.repositories.SimulationOutputRepository;
 import com.example.covidsimulator.exceptions.PopulationBelowZeroException;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @NoArgsConstructor
@@ -22,17 +21,22 @@ public class SimulationComputingService {
     private SimulationEntrySetRepository simulationEntrySetRepository;
     @Autowired
     private SimulationOutputRepository simulationOutputRepository;
+    @Autowired
+    private DtoAssembler dtoAssembler;
+    @Autowired
+    private EntityMapper entityMapper;
 
-public void computeSimulation(SimulationEntryData simulationEntryData) throws PopulationBelowZeroException{
+public void computeSimulation(SimulationEntryDataDto simulationEntryDataDto) throws PopulationBelowZeroException{
 
-    Integer numberOfIteration = simulationEntryData.getTimeOfSimulation();
-    Double rIndicator = simulationEntryData.getRIndicator();
-    Double mortalityRate = simulationEntryData.getMortality();//not yet
-    Integer basicPopulation = simulationEntryData.getPopulation();
-    double infectedPatients = simulationEntryData.getInfectedPopulation(); //double
+    SimulationEntryData simulationEntryData = entityMapper.mapSimulationEntryDataDto(simulationEntryDataDto);
+    Integer numberOfIteration = simulationEntryDataDto.getTimeOfSimulation();
+    Double rIndicator = simulationEntryDataDto.getRIndicator();
+    Double mortalityRate = simulationEntryDataDto.getMortality();//not yet
+    Integer basicPopulation = simulationEntryDataDto.getPopulation();
+    double infectedPatients = simulationEntryDataDto.getInfectedPopulation(); //double
     double peopleVulnerable = basicPopulation-infectedPatients; //double
-    Integer timeOfInfectionInDays = simulationEntryData.getTimeOfInfection();
-    Integer timeOfMort = simulationEntryData.getTimeOfMortality();
+    Integer timeOfInfectionInDays = simulationEntryDataDto.getTimeOfInfection();
+    Integer timeOfMort = simulationEntryDataDto.getTimeOfMortality();
     double peopleDied = 0; //double
     double peopleResisted = 0; // double
 
@@ -60,10 +64,13 @@ public void computeSimulation(SimulationEntryData simulationEntryData) throws Po
         simulationOutput.setPeopleDead(peopleDied);
         simulationEntryData.addSimulationOutput(simulationOutput);
     }
+
     this.simulationEntrySetRepository.save(simulationEntryData);
-    }
-    public List<SimulationOutput> retrieveListOfSimulation(String nameOfSimulation){
-        return this.simulationOutputRepository.findAllBySimulationEntryDataName(nameOfSimulation);
+}
+    public List<SimulationOutputDto> retrieveListOfSimulation(String nameOfSimulation){
+        List<SimulationOutput> list = this.simulationOutputRepository.findAllBySimulationEntryDataName(nameOfSimulation);
+        SimulationEntryData entry = list.get(0).getSimulationEntryData();
+        return list.stream().map(dtoAssembler::mapSimulationOutput).collect(Collectors.toList());
     }
     public void deleteSimulationDataByName(String name){
         SimulationEntryData simulationEntryData = this.simulationEntrySetRepository.findByName(name);

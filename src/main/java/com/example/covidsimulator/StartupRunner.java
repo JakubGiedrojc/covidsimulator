@@ -1,5 +1,6 @@
 package com.example.covidsimulator;
 
+import com.example.covidsimulator.api.SimulationEntryDataDto;
 import com.example.covidsimulator.database.entities.SimulationEntryData;
 import com.example.covidsimulator.database.entities.SimulationOutput;
 import com.example.covidsimulator.database.repositories.SimulationOutputRepository;
@@ -22,25 +23,26 @@ public class StartupRunner implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         log.info("executing startup actions: ");
-        SimulationEntryData simulationEntryData = new SimulationEntryData();
-        simulationEntryData.setInfectedPopulation(10);
-        simulationEntryData.setPopulation(1000);
-        simulationEntryData.setRIndicator(2.0);
-        simulationEntryData.setTimeOfSimulation(24);
-        simulationEntryData.setTimeOfInfection(10);
-        simulationEntryData.setMortality(0.05);
-        simulationEntryData.setTimeOfMortality(5);
-        simulationEntryData.setName("Test");
+        SimulationEntryDataDto simulationEntryData = SimulationEntryDataDto.builder()
+            .infectedPopulation(10)
+            .population(1000)
+            .rIndicator(2.0)
+            .timeOfSimulation(24)
+            .timeOfInfection(10)
+            .mortality(0.05)
+            .timeOfMortality(5)
+            .name("test")
+            .build();
 
-        SimulationEntryData simulationEntryData1 = new SimulationEntryData();
-        simulationEntryData1.setInfectedPopulation(20);
-        simulationEntryData1.setPopulation(10000);
-        simulationEntryData1.setRIndicator(1.5);
-        simulationEntryData1.setTimeOfSimulation(30);
-        simulationEntryData1.setTimeOfInfection(20);
-        simulationEntryData1.setMortality(0.1);
-        simulationEntryData1.setTimeOfMortality(5);
-        simulationEntryData1.setName("Test2");
+        SimulationEntryDataDto simulationEntryData1 = SimulationEntryDataDto.builder()
+            .infectedPopulation(20)
+            .population(10000)
+            .rIndicator(1.5)
+            .timeOfSimulation(30)
+            .timeOfInfection(20)
+            .mortality(0.1)
+            .timeOfMortality(5)
+            .name("Test2").build();
         simulationComputingService.computeSimulation(simulationEntryData);
         simulationComputingService.computeSimulation(simulationEntryData1);
 

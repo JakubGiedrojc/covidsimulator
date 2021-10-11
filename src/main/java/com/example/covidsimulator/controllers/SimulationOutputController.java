@@ -1,5 +1,7 @@
 package com.example.covidsimulator.controllers;
 
+import com.example.covidsimulator.api.SimulationEntryDataDto;
+import com.example.covidsimulator.api.SimulationOutputDto;
 import com.example.covidsimulator.database.entities.SimulationEntryData;
 import com.example.covidsimulator.database.entities.SimulationOutput;
 import com.example.covidsimulator.exceptions.PopulationBelowZeroException;
@@ -21,14 +23,14 @@ public class SimulationOutputController {
 
     @PostMapping("createsimulation")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createSimulation(@RequestBody SimulationEntryData simulationEntryData) throws PopulationBelowZeroException {
-        log.info(String.valueOf(simulationEntryData));
-        this.simulationComputingService.computeSimulation(simulationEntryData);
+    public void createSimulation(@RequestBody SimulationEntryDataDto simulationEntryDataDto) throws PopulationBelowZeroException {
+        log.info(String.valueOf(simulationEntryDataDto));
+        this.simulationComputingService.computeSimulation(simulationEntryDataDto);
         log.info("new simulation created");
     }
     @GetMapping("findsimulation/{name}")
     @ResponseStatus(HttpStatus.FOUND)
-    public List<SimulationOutput> findOutputSimulation(@PathVariable String name){
+    public List<SimulationOutputDto> findOutputSimulation(@PathVariable String name){
         log.info("List of SimulationOutputFound for: "+name);
         log.info(this.simulationComputingService.retrieveListOfSimulation(name).stream().toString());
         return this.simulationComputingService.retrieveListOfSimulation(name);
